@@ -52,7 +52,7 @@ static size_t reduce_capacity (size_t capacity, size_t new_size)
 
 static size_t increase_capacity (size_t capacity, size_t new_size)
 {
-	if ( new_size == capacity )
+	if (new_size >= capacity)
 	{
 		if (capacity < 256)
 		{
@@ -450,7 +450,7 @@ stack_error_t stack_pop (stack_t *stack, void *result)
 		void *realloc_check = realloc(stack->data, need_memory);
 		if (!realloc_check)
 			return ALLOCATION_ERROR;
-		realloc_check = stack->data;
+		stack->data = realloc_check;
 
 		stack->capacity = new_capacity;
 	}
