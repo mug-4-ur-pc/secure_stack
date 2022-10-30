@@ -436,7 +436,7 @@ stack_error_t stack_pop (stack_t *stack, void *result)
 	{
 		free(stack->data);
 		stack->data = POISON_PTR;
-		stack->capacity = new_capacity;
+		stack->capacity = 1;
 	}
 	else if (stack->capacity != new_capacity)
 	{
