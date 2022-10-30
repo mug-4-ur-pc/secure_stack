@@ -298,6 +298,8 @@ stack_error_t stack_deconstructor (stack_t *stack)
 
 stack_error_t stack_check_func_ (stack_t *stack, _CODE_POSITION_T_)
 {
+	(void) fname, (void) func, (void) line;
+
 	bool error = false;
 	char str[200];
 

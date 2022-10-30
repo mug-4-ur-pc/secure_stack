@@ -280,7 +280,7 @@ void write_log_at (const char *msg, const char *data,
 #define add_sublog(msg, data, danger, deep_lvl)
 
 
-#define add_table_log(msg, arr, n, print_func, danger, deep_lvl)
+#define add_table_log(msg, arr, size, element_size, print_func, danger, deep_lvl)
 
 
 #define if_log(ASSERTION_, DANGER_STATUS_) if ( ASSERTION_ )
