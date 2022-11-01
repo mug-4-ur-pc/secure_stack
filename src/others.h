@@ -56,7 +56,7 @@ bool is_bad_mem (const void* ptr, size_t size);
  *
  *  @note This macro uses Linox system call.
  */
-#define is_bad_ptr(PTR_) is_bad_mem(PTR_, sizeof (PTR_))
+#define is_bad_ptr(PTR_) is_bad_mem(PTR_, sizeof *PTR_)
 
 
 #endif

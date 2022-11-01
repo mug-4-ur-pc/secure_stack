@@ -139,7 +139,7 @@ bool check_stack_data (stack_t *stack, char *str)
 				+ sizeof CANARY + data_length);
 
 		sprintf(str, "Left canary = %llx. Right canary = %llx. "
-				"CANARY = %llx", left_canary, right_canary, CANARY);
+				"CANARY = %lx", left_canary, right_canary, CANARY);
 		if (left_canary != CANARY || right_canary != CANARY)
 		{
 			add_sublog("Canaries in stack data corrupted!", str,
@@ -274,16 +274,14 @@ stack_error_t stack_deconstructor (stack_t *stack)
 
 	#endif
 
-		stack->size     = 0;
-		stack->capacity = 1;
+		stack->size     = 1;
+		stack->capacity = 0;
 		
 		if (stack->data != POISON_PTR)
 		{
 			free(stack->data);
-			stack->data = POISON_PTR;
+			stack->data = NULL;
 		}
-
-		stack_calculate_hash(stack);
 
 		return STACK_OK;
 
@@ -350,7 +348,7 @@ stack_error_t stack_check_func_ (stack_t *stack, _CODE_POSITION_T_)
 		stack_length += 2 * sizeof CANARY;
 
 		sprintf(str, "%s->left_canary = %llx, %s->right_canary = %llx, "
-				"CANARY = %llx", stack->name, stack->left_canary,
+				"CANARY = %lx", stack->name, stack->left_canary,
 				stack->name, stack->right_canary, CANARY);
 		if (stack->left_canary != CANARY || stack->right_canary != CANARY)
 		{

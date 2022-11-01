@@ -3,6 +3,8 @@
  * @brief This is config file for secure_stack.c
  */
 
+#include <inttypes.h>
+
 #define ON  1
 #define OFF 0
 
@@ -22,6 +24,6 @@
 */
 #define HASH       ON 
 
-#define POISON     145
-#define POISON_PTR (void *)300
-#define CANARY     0x47C0DAB1EC0DEBEFULL
+#define POISON     ((uint8_t)  145                  )
+#define POISON_PTR ((void*)    300                  )
+#define CANARY     ((uint64_t) 0x47C0DAB1EC0DEBEFULL)
