@@ -75,6 +75,33 @@ static void insert_canary (void *data)
 }
 
 
+static stack_error_t stack_increase_capacity (stack_t* stack, size_t new_capacity)
+{
+	size_t need_memory = new_capacity * stack->element_size;
+	#if CANARIES == ON
+		need_memory += 2 * sizeof CANARY;
+	#endif
+	
+	if (stack->data == POISON_PTR)
+		stack->data = NULL;
+
+	void *realloc_check = realloc(stack->data, need_memory);
+	if (!realloc_check)
+		return ALLOCATION_ERROR;
+	stack->data = realloc_check;
+
+	#if CANARIES == ON
+		if (stack->size == 1)
+			insert_canary(stack->data);
+		insert_canary(stack->data + sizeof CANARY +
+		              new_capacity * stack->element_size);
+	#endif
+
+	stack->capacity = new_capacity;
+	return STACK_OK;
+}
+
+
 static void *stack_last_element_ptr(stack_t *stack)
 {
 	void *result = stack->data +
@@ -438,22 +465,10 @@ stack_error_t stack_pop (stack_t *stack, void *result)
 		stack->data = POISON_PTR;
 		stack->capacity = 1;
 	}
-	else if (stack->capacity != new_capacity)
-	{
-		size_t need_memory = new_capacity * stack->element_size;
-		#if CANARIES == ON
-			need_memory += 2 * sizeof CANARY;
-			insert_canary(stack->data + sizeof CANARY +
-				      stack->element_size * new_capacity);
-		#endif
+	else if (stack->capacity != new_capacity
+	         && !stack_increase_capacity(stack, new_capacity))
+		return ALLOCATION_ERROR;
 
-		void *realloc_check = realloc(stack->data, need_memory);
-		if (!realloc_check)
-			return ALLOCATION_ERROR;
-		stack->data = realloc_check;
-
-		stack->capacity = new_capacity;
-	}
 	stack_calculate_hash(stack);
 
 	return STACK_OK;
@@ -485,33 +500,13 @@ stack_error_t stack_push (stack_t *stack, const void *pushed_value)
 
 	if (new_capacity != stack->capacity)
 	{
-		size_t need_memory = new_capacity * stack->element_size;
-
-		#if CANARIES == ON
-			need_memory += 2 * sizeof CANARY;
-		#endif
-		
-		if (stack->data == POISON_PTR)
-			stack->data = NULL;
-
-		void *realloc_check = realloc(stack->data, need_memory);
-		if (!realloc_check)
+		if (!stack_increase_capacity(stack, new_capacity))
 			return ALLOCATION_ERROR;
-		stack->data = realloc_check;
 
-		#if CANARIES == ON
-			if (stack->size == 1)
-				insert_canary(stack->data);
-			insert_canary(stack->data + sizeof CANARY +
-				      new_capacity * stack->element_size);
-		#endif
-		
 		last_element_ptr = stack_last_element_ptr(stack);
 
 		memset(last_element_ptr + stack->element_size, POISON,
 		       (new_capacity - stack->size) * stack->element_size);
-
-		stack->capacity = new_capacity;
 	}
 	else
 	{
@@ -523,3 +518,4 @@ stack_error_t stack_push (stack_t *stack, const void *pushed_value)
 
 	return STACK_OK;
 }
+
